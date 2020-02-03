@@ -13,6 +13,9 @@ var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 var voiceSelect = document.getElementById("voice");
 var source;
 var stream;
+var myHeading = document.querySelector('h3');
+var mySecondary = document.querySelector('h2');
+var SongData;
 
 // grab the mute button to use below
 
@@ -32,6 +35,7 @@ var convolver = audioCtx.createConvolver();
 
 // distortion curve for the waveshaper, thanks to Kevin Ennis
 // http://stackoverflow.com/questions/22312841/waveshaper-node-in-webaudio-how-to-emulate-distortion
+
 
 function makeDistortionCurve(amount) {
   var k = typeof amount === 'number' ? amount : 50,
@@ -75,7 +79,6 @@ ajaxRequest.onload = function() {
 ajaxRequest.send();
 
 // set up canvas context for visualizer
-
 var canvas = document.querySelector('.visualizer');
 //var canvas2 = document.querySelector('.visualizer2');
 var canvasCtx = canvas.getContext("2d");
@@ -192,7 +195,7 @@ function visualize() {
     var bufferLength = analyser.frequencyBinCount;
     console.log(bufferLength);
     var dataArray = new Float32Array(bufferLength);
-
+	SongData = dataArray;
     canvasCtx.clearRect(0, 0, WIDTH, HEIGHT);
 
     function draw() {
@@ -209,7 +212,7 @@ function visualize() {
 
       for(var i = 0; i < bufferLength; i++) {
         barHeight = (dataArray[i] + 140)*2;
-        
+        myHeading.textContent = dataArray;
         canvasCtx.fillStyle = 'rgb(' + Math.floor(barHeight+100) + ',50,50)';
         canvasCtx.fillRect(x,HEIGHT-barHeight/2,barWidth,barHeight/2);
 
@@ -326,15 +329,52 @@ var AudioContext = window.AudioContext || window.webkitAudioContext; //Cross bro
 	}
 	
 	var render = function() {
+		/*
+		analyser.fftSize = 256;
+   		var bufferLength = analyser2.frequencyBinCount;
+    	console.log(bufferLength);
+    	var dataArray = new Float32Array(bufferLength);
+    	ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+    	function draw() {
+     	 drawVisual = requestAnimationFrame(draw);
+
+      	 analyser2.getFloatFrequencyData(dataArray);
+
+     	 ctx.fillStyle = 'rgb(0, 0, 0)';
+     	 ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+      	var barWidth = (WIDTH / bufferLength) * 2.5;
+     	 var barHeight;
+      	var x = 0;
+
+      	for(var i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] + 140)*2;
+        myHeading.textContent = dataArray;
+        ctx.fillStyle = 'rgb(' + Math.floor(barHeight+100) + ',50,50)';
+        ctx.fillRect(x,HEIGHT-barHeight/2,barWidth,barHeight/2);
+
+        x += barWidth + 1;
+      	}
+    	};
+	
+    	draw();
+	*/
+	
+	
+		WIDTH2 = canvas.width;
+  		HEIGHT2 = canvas.height;
 		ctx = canvas2.getContext("2d");
 		ctx.strokeStyle = "#00d0ff";
 		ctx.lineWidth = 2;
 		ctx.clearRect(0, 0, canvas2.width, canvas2.height);
-	
-		var dataArray = new Uint8Array(analyser2.frequencyBinCount);
-		analyser2.getByteFrequencyData(dataArray);
+		var bufferLength = analyser2.frequencyBinCount;
+    	console.log(bufferLength);
+		var dataArray = new Float32Array(analyser2.frequencyBinCount);
+		analyser2.getFloatFrequencyData(dataArray);
 		var step = Math.round(dataArray.length / 60);
-	
+	    mySecondary.textContent = dataArray;
+		/*
 		for (var i = 0; i < 40; i++) {
 			var energy = (dataArray[step * i] / 256.0) * 50;
 			for (var j = 0; j < energy; j++) {
@@ -352,7 +392,21 @@ var AudioContext = window.AudioContext || window.webkitAudioContext; //Cross bro
 			ctx.lineTo(20 * (i + 1) - 2, 200);
 			ctx.stroke();
 		}
-	
+	*/
+	var barWidth = (WIDTH2 / bufferLength) * 2.5;
+     	 var barHeight;
+      	var x = 0;
+
+      	for(var i = 0; i < bufferLength; i++) {
+        barHeight = (dataArray[i] + 140)*2;
+        //myHeading.textContent = dataArray;
+        ctx.fillStyle = 'rgb(' + Math.floor(barHeight+100) + ',50,50)';
+		if(dataArray[i] != SongData[i])
+			ctx.fillStyle = "blue";
+        ctx.fillRect(x,HEIGHT2-barHeight/2,barWidth,barHeight/2);
+
+        x += barWidth + 1;
+      	}
 		window.requestAnimationFrame(render);
 	}
 	
